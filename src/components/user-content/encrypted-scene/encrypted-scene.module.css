@@ -1,0 +1,7 @@
+.text {
+    font-size: 30px;
+    background: linear-gradient(to right, #b2b7bc 30%, #f7f9fb 90%);
+    filter: blur(1px);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
