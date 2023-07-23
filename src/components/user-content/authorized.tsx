@@ -9,6 +9,7 @@ import EncryptedScene from '@/components/user-content/encrypted-scene';
 import DecryptedScene from '@/components/user-content/decrypted-scene';
 import { EncryptedContentDto } from '@/services/ton-vault-api/dto';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
+import LoadingScreen from '@/components/loading-screen';
 
 export type LoadingState = {
     decrypting: boolean;
@@ -105,6 +106,10 @@ const Authorized: FunctionComponent = () => {
                 updateWholeContent={updateWholeContent}
             />
         );
+    }
+
+    if (loading.decrypting || loading.updating) {
+        return <LoadingScreen />;
     }
 
     return (
