@@ -97,6 +97,16 @@ const Authorized: FunctionComponent = () => {
         });
     };
 
+    if (!userState.encryptedContent) {
+        return (
+            <DecryptedScene
+                decryptedSecrets={decryptedContent.secrets}
+                setDecryptedSecrets={setDecryptedSecrets}
+                updateWholeContent={updateWholeContent}
+            />
+        );
+    }
+
     return (
         <Box m={4}>
             {contentDecrypted ? (
