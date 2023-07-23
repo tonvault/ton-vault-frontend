@@ -1,7 +1,7 @@
 {
   "name": "ton-vault-frontend",
   "version": "0.1.0",
-  "description": "Ton Vault Backend",
+  "description": "Ton Vault Frontend",
   "author": "shcube",
   "license": "Apache-2.0",
   "scripts": {
