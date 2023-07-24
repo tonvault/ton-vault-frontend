@@ -10,13 +10,20 @@ import axios, { AxiosResponse } from 'axios';
 import { Env } from '@/services/env/env';
 import { SecretKeeper } from '@/store/secret-keeper/secret-keeper';
 
+export enum TonVaultApiRoutes {
+    AUTH_REQUEST = 'auth/auth-request',
+    LOGIN = 'auth/login',
+    GET = 'get',
+    CREATE = 'create',
+}
+
 // todo: refresh token
 export class TonVaultApi {
     private constructor() {}
 
     public static async getAuthPayload(): Promise<GeneralApiAnswerDto<ConnectAdditionalRequest>> {
         const res = await axios.get<GeneralApiAnswerDto<ConnectAdditionalRequest>>(
-            'auth/auth-request',
+            TonVaultApiRoutes.AUTH_REQUEST,
             {
                 baseURL: Env.tonVaultApiUrl,
             },
@@ -26,7 +33,7 @@ export class TonVaultApi {
 
     public static async signIn(signInDto: SignInDto): Promise<GeneralApiAnswerDto<AccessTokenDto>> {
         const { data } = await axios.post<GeneralApiAnswerDto<AccessTokenDto>>(
-            'auth/login',
+            TonVaultApiRoutes.LOGIN,
             signInDto,
             {
                 baseURL: Env.tonVaultApiUrl,
@@ -43,7 +50,7 @@ export class TonVaultApi {
     ): Promise<GeneralApiAnswerDto<EncryptedContentDto | string>> {
         const parsedToken = SecretKeeper.parseJwt(token);
         const { data } = await axios.get<GeneralApiAnswerDto<EncryptedContentDto | string>>(
-            `get/${parsedToken.pub}`,
+            `${TonVaultApiRoutes.GET}/${parsedToken.pub}`,
             {
                 baseURL: Env.tonVaultApiUrl,
             },
@@ -62,7 +69,7 @@ export class TonVaultApi {
             GeneralApiAnswerDto,
             AxiosResponse<GeneralApiAnswerDto>,
             CreateContentDto
-        >('create', createContentDto, {
+        >(TonVaultApiRoutes.CREATE, createContentDto, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
