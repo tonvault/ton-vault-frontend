@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FunctionComponent, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { SecretInterface } from '@/store/secret-keeper/interface/raw-user-content.interface';
@@ -10,14 +12,17 @@ type DecryptedSceneProps = {
     decryptedSecrets: SecretInterface[];
     setDecryptedSecrets: (secrets: SecretInterface[]) => void;
     updateWholeContent: () => void;
+    setSecretsModified: (modified: boolean) => void;
+    secretsModified: boolean;
 };
 
 const DecryptedScene: FunctionComponent<DecryptedSceneProps> = ({
     decryptedSecrets,
     setDecryptedSecrets,
     updateWholeContent,
+    setSecretsModified,
+    secretsModified,
 }) => {
-    const [secretsModified, setSecretsModified] = useState<boolean>(false);
     const [activeSecret, setActiveSecret] = useState<SecretInterface>(emptySecret);
     const { isOpen, onClose, onOpen } = useDisclosure();
 

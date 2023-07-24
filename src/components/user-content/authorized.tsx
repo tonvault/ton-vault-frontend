@@ -10,6 +10,9 @@ import DecryptedScene from '@/components/user-content/decrypted-scene';
 import { EncryptedContentDto } from '@/services/ton-vault-api/dto';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
 import LoadingScreen from '@/components/loading-screen';
+import { ErrorWithCode } from '@/utils/error-with-code';
+import { AnswerCode } from '@/services/ton-vault-api/answer-code';
+import useTonConnectContext from '@/providers/ton-connect-provider/use-ton-connect-context';
 
 export type LoadingState = {
     decrypting: boolean;
@@ -18,6 +21,7 @@ export type LoadingState = {
 
 const Authorized: FunctionComponent = () => {
     const [contentDecrypted, setContentDecrypted] = useState<boolean>(false);
+    const [secretsModified, setSecretsModified] = useState<boolean>(false);
     const [decryptedContent, setDecryptedContent] = useState<RawUserContentInterface>({
         secrets: [],
         lastUpdate: 0,
@@ -29,6 +33,7 @@ const Authorized: FunctionComponent = () => {
     const toast = useToast();
     const toastIdRef = useRef<ToastId>();
     const { userState } = useUserContext();
+    const { tonConnect } = useTonConnectContext();
 
     const decryptContent = async (encryptedContent: EncryptedContentDto) => {
         setLoading({ ...loading, decrypting: true });
@@ -68,6 +73,7 @@ const Authorized: FunctionComponent = () => {
                 return;
             }
             await userState.sendAndObtainLastEncryptedContent(createContentDto);
+            setSecretsModified(false);
             setDecryptedContent({
                 lastUpdate: now,
                 secrets: [],
@@ -79,8 +85,11 @@ const Authorized: FunctionComponent = () => {
                 status: 'success',
                 duration: 2000,
             });
-        } catch (e) {
-            const err: any = e;
+        } catch (e: any) {
+            const err: ErrorWithCode = e;
+            if (err.code && err.code === AnswerCode.TokenExpired) {
+                await userState.signOut(tonConnect);
+            }
             toastIdRef.current = toast({
                 description: err?.message || 'Request rejected!',
                 position: 'top-left',
@@ -104,6 +113,8 @@ const Authorized: FunctionComponent = () => {
                 decryptedSecrets={decryptedContent.secrets}
                 setDecryptedSecrets={setDecryptedSecrets}
                 updateWholeContent={updateWholeContent}
+                secretsModified={secretsModified}
+                setSecretsModified={setSecretsModified}
             />
         );
     }
@@ -119,6 +130,8 @@ const Authorized: FunctionComponent = () => {
                     decryptedSecrets={decryptedContent.secrets}
                     setDecryptedSecrets={setDecryptedSecrets}
                     updateWholeContent={updateWholeContent}
+                    secretsModified={secretsModified}
+                    setSecretsModified={setSecretsModified}
                 />
             ) : (
                 <EncryptedScene

@@ -4,6 +4,8 @@ import { createContext, ReactNode, useEffect, useMemo, useRef, useState } from '
 import { ITonConnect, TonConnect } from '@tonconnect/sdk';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
 import { ToastId, useToast } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
+import { SecretKeeper } from '@/store/secret-keeper/secret-keeper';
 
 export type TonConnectContextType = {
     tonConnect: ITonConnect | null;
@@ -48,10 +50,14 @@ const TonConnectProvider = ({ manifestUrl, children }: TonConnectorProviderProps
             });
             tonConnect.onStatusChange(async (wallet) => {
                 if (!wallet) {
-                    return userState.signOut();
+                    return;
                 }
                 if (userState.isAuthorized) {
                     return;
+                }
+                const jwt = SecretKeeper.getJwt();
+                if (jwt && !SecretKeeper.checkJwt(jwt)) {
+                    return userState.signOut(tonConnect);
                 }
                 try {
                     userState.fetchingData = true;
@@ -64,7 +70,7 @@ const TonConnectProvider = ({ manifestUrl, children }: TonConnectorProviderProps
                         status: 'error',
                         duration: 3000,
                     });
-                    await tonConnect.disconnect();
+                    await userState.signOut(tonConnect);
                 } finally {
                     userState.fetchingData = false;
                 }
@@ -84,4 +90,4 @@ const TonConnectProvider = ({ manifestUrl, children }: TonConnectorProviderProps
     );
 };
 
-export default TonConnectProvider;
+export default observer(TonConnectProvider);

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FunctionComponent } from 'react';
 import TonConnectProvider from '@/providers/ton-connect-provider';
 import { Env } from '@/services/env/env';

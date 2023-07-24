@@ -11,6 +11,7 @@ enum AnswerCode {
     TonProofNoPubKey = 15,
     TonProofInvalidSignature = 16,
     TonProofExpired = 17,
+    TokenExpired = 18,
 }
 
 const AnswerDescription = new Map<AnswerCode, string>();
@@ -26,5 +27,6 @@ AnswerDescription.set(AnswerCode.TonProofErrorPresent, 'Ton proof error from ton
 AnswerDescription.set(AnswerCode.TonProofNoPubKey, 'No public key.');
 AnswerDescription.set(AnswerCode.TonProofInvalidSignature, 'Invalid signature.');
 AnswerDescription.set(AnswerCode.TonProofExpired, 'Ton proof expired.');
+AnswerDescription.set(AnswerCode.TokenExpired, 'Session expired.');
 
 export { AnswerCode, AnswerDescription };

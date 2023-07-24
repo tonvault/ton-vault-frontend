@@ -11,12 +11,13 @@ import {
 import { FunctionComponent, useEffect, useRef, useState } from 'react';
 import { isWalletInfoCurrentlyInjected, WalletInfo } from '@tonconnect/sdk';
 import useTonConnectContext from '@/providers/ton-connect-provider/use-ton-connect-context';
-import { Button, Flex, Image, Spinner, ToastId, useToast } from '@chakra-ui/react';
+import { Button, Flex, Image, ToastId, useToast } from '@chakra-ui/react';
 import isCompatibleWallet from '@/utils/is-compatible-wallet';
 import { CompatibleWalletNames } from '@/constant/compatible-wallets';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
 import { observer } from 'mobx-react-lite';
 import { TonVaultApi } from '@/services/ton-vault-api/ton-vault-api';
+import LoadingScreen from '@/components/loading-screen';
 
 type TonConnectModalProps = {
     isOpen: boolean;
@@ -85,16 +86,7 @@ const TonConnectModal: FunctionComponent<TonConnectModalProps> = ({ isOpen, onCl
     };
 
     const button = (wallet: WalletInfo) => {
-        return userState.fetchingData ? (
-            <Button
-                leftIcon={<Image src={wallet.imageUrl} alt="no image" w="20px" h="20px" />}
-                mx={1}
-                key={wallet.name}
-                disabled={true}
-            >
-                <Spinner />
-            </Button>
-        ) : (
+        return (
             <Button
                 leftIcon={<Image src={wallet.imageUrl} alt="no image" w="20px" h="20px" />}
                 mx={1}
@@ -105,6 +97,10 @@ const TonConnectModal: FunctionComponent<TonConnectModalProps> = ({ isOpen, onCl
             </Button>
         );
     };
+
+    if (userState.fetchingData) {
+        return <LoadingScreen />;
+    }
 
     return (
         <>

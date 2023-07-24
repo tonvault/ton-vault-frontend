@@ -1,10 +1,18 @@
+'use client';
+
 import { makeAutoObservable } from 'mobx';
-import { TonProofItemReplyError, TonProofItemReplySuccess, Wallet } from '@tonconnect/sdk';
+import {
+    ITonConnect,
+    TonProofItemReplyError,
+    TonProofItemReplySuccess,
+    Wallet,
+} from '@tonconnect/sdk';
 import { SecretKeeper } from '@/store/secret-keeper/secret-keeper';
 import { TonVaultApi } from '@/services/ton-vault-api/ton-vault-api';
 import axios from 'axios';
 import { AnswerCode, AnswerDescription } from '@/services/ton-vault-api/answer-code';
 import { CreateContentDto, EncryptedContentDto } from '@/services/ton-vault-api/dto';
+import { ErrorWithCode } from '@/utils/error-with-code';
 
 export class UserState {
     private _wallet: Wallet | null = null;
@@ -122,21 +130,33 @@ export class UserState {
     // todo: single request
     async sendAndObtainLastEncryptedContent(createContentDto: CreateContentDto) {
         const token = SecretKeeper.getJwt();
-        if (!token) {
-            throw new Error('User is not authorized!');
+        if (!token || !SecretKeeper.checkJwt(token)) {
+            throw new ErrorWithCode(
+                AnswerCode.TokenExpired,
+                AnswerDescription.get(AnswerCode.TokenExpired),
+            );
         }
         const { code } = await TonVaultApi.createContent(createContentDto, token);
         if (code !== AnswerCode.success) {
-            throw new Error(AnswerDescription.get(code));
+            throw new ErrorWithCode(code, AnswerDescription.get(code));
         }
         await this.obtainLastEncryptedContent();
     }
 
-    signOut() {
-        this.wallet = null;
-        this.publicKey = null;
-        SecretKeeper.removeJwt();
-        this.isAuthorized = false;
+    signOut(tonConnect: ITonConnect | null) {
+        if (tonConnect && tonConnect.wallet) {
+            return tonConnect.disconnect().then(() => {
+                this.wallet = null;
+                this.publicKey = null;
+                SecretKeeper.removeJwt();
+                this.isAuthorized = false;
+            });
+        } else {
+            this.wallet = null;
+            this.publicKey = null;
+            SecretKeeper.removeJwt();
+            this.isAuthorized = false;
+        }
     }
 
     get secretKeeper() {
