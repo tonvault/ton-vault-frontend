@@ -49,13 +49,22 @@ const Authorized: FunctionComponent = () => {
                 duration: 3000,
             });
             setContentDecrypted(true);
-        } catch (e) {
-            toastIdRef.current = toast({
-                description: 'Request rejected!',
-                position: 'top-left',
-                status: 'error',
-                duration: 3000,
-            });
+        } catch (e: any) {
+            if (e.code === 1001) {
+                toastIdRef.current = toast({
+                    description: 'Please use only one wallet extension at a time!',
+                    position: 'top-left',
+                    status: 'error',
+                    duration: 3000,
+                });
+            } else {
+                toastIdRef.current = toast({
+                    description: 'Request rejected!',
+                    position: 'top-left',
+                    status: 'error',
+                    duration: 3000,
+                });
+            }
         }
         setLoading({ ...loading, decrypting: false });
     };
