@@ -12,11 +12,7 @@ import { useUserContext } from '@/providers/user-state-provider/use-user-context
 import { ErrorWithCode } from '@/utils/error-with-code';
 import { AnswerCode } from '@/services/ton-vault-api/answer-code';
 import useTonConnectContext from '@/providers/ton-connect-provider/use-ton-connect-context';
-
-export type LoadingState = {
-    decrypting: boolean;
-    updating: boolean;
-};
+import LoadingScreen from '@/components/loading-screen';
 
 const Authorized: FunctionComponent = () => {
     const [contentDecrypted, setContentDecrypted] = useState<boolean>(false);
@@ -25,18 +21,14 @@ const Authorized: FunctionComponent = () => {
         secrets: [],
         lastUpdate: 0,
     });
-    const [loading, setLoading] = useState<LoadingState>({
-        decrypting: false,
-        updating: false,
-    });
     const toast = useToast();
     const toastIdRef = useRef<ToastId>();
     const { userState } = useUserContext();
     const { tonConnect } = useTonConnectContext();
 
     const decryptContent = async (encryptedContent: EncryptedContentDto) => {
-        setLoading({ ...loading, decrypting: true });
         try {
+            userState.fetchingData = true;
             const content = await userState.secretKeeper?.decryptContent(encryptedContent);
             if (content) {
                 setDecryptedContent(content);
@@ -64,20 +56,20 @@ const Authorized: FunctionComponent = () => {
                     duration: 3000,
                 });
             }
+        } finally {
+            userState.fetchingData = false;
         }
-        setLoading({ ...loading, decrypting: false });
     };
 
     const updateWholeContent = async () => {
-        setLoading({ ...loading, updating: true });
         try {
+            userState.fetchingData = true;
             const now = Date.now();
             const createContentDto = await userState.secretKeeper?.generateCreateContentDto({
                 lastUpdate: now,
                 secrets: decryptedContent.secrets,
             });
             if (!createContentDto) {
-                setLoading({ ...loading, updating: false });
                 return;
             }
             await userState.sendAndObtainLastEncryptedContent(createContentDto);
@@ -104,8 +96,9 @@ const Authorized: FunctionComponent = () => {
                 status: 'error',
                 duration: 3000,
             });
+        } finally {
+            userState.fetchingData = false;
         }
-        setLoading({ ...loading, updating: false });
     };
 
     const setDecryptedSecrets = (secrets: SecretInterface[]) => {
@@ -130,19 +123,23 @@ const Authorized: FunctionComponent = () => {
     return (
         <Box m={4}>
             {contentDecrypted ? (
-                <DecryptedScene
-                    decryptedSecrets={decryptedContent.secrets}
-                    setDecryptedSecrets={setDecryptedSecrets}
-                    updateWholeContent={updateWholeContent}
-                    secretsModified={secretsModified}
-                    setSecretsModified={setSecretsModified}
-                />
+                <LoadingScreen>
+                    <DecryptedScene
+                        decryptedSecrets={decryptedContent.secrets}
+                        setDecryptedSecrets={setDecryptedSecrets}
+                        updateWholeContent={updateWholeContent}
+                        secretsModified={secretsModified}
+                        setSecretsModified={setSecretsModified}
+                    />
+                </LoadingScreen>
             ) : (
-                <EncryptedScene
-                    decryptContent={() =>
-                        decryptContent(userState.encryptedContent as EncryptedContentDto)
-                    }
-                />
+                <LoadingScreen>
+                    <EncryptedScene
+                        decryptContent={() =>
+                            decryptContent(userState.encryptedContent as EncryptedContentDto)
+                        }
+                    />
+                </LoadingScreen>
             )}
         </Box>
     );

@@ -21,7 +21,7 @@ const LoadingScreen: FunctionComponent<LoadingScreenProps> = ({ children }) => {
         if (userState.fetchingData) {
             timeoutRef.current = setTimeout(() => {
                 setLoading(true);
-            }, 700);
+            }, 1000);
         }
         return () => {
             if (timeoutRef.current) {

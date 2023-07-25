@@ -4,6 +4,7 @@ import { useUserContext } from '@/providers/user-state-provider/use-user-context
 import NotAuthorized from '@/components/user-content/not-authorized';
 import Authorized from '@/components/user-content/authorized';
 import { ToastId, useToast } from '@chakra-ui/react';
+import LoadingScreen from '@/components/loading-screen';
 
 const UserContent = () => {
     const { userState } = useUserContext();
@@ -15,6 +16,7 @@ const UserContent = () => {
             try {
                 userState.fetchingData = true;
                 await userState.obtainLastEncryptedContent();
+                setContentFetched(true);
             } catch (e) {
                 const err: any = e;
                 toastIdRef.current = toast({
@@ -28,11 +30,17 @@ const UserContent = () => {
             }
         };
         if (userState.isAuthorized) {
-            obtainData().then(() => setContentFetched(true));
+            obtainData();
         }
     }, [userState.isAuthorized, userState.encryptedContent]);
 
-    return userState.isAuthorized && contentFetched ? <Authorized /> : <NotAuthorized />;
+    return userState.isAuthorized && contentFetched ? (
+        <Authorized />
+    ) : (
+        <LoadingScreen>
+            <NotAuthorized />
+        </LoadingScreen>
+    );
 };
 
 export default observer(UserContent);

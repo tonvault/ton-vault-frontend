@@ -13,11 +13,9 @@ export default function Page() {
         <Index>
             <Box className="page-container">
                 <Header />
-                <LoadingScreen>
-                    <Box className="content-wrapper">
-                        <UserContent />
-                    </Box>
-                </LoadingScreen>
+                <Box className="content-wrapper">
+                    <UserContent />
+                </Box>
                 <Footer />
             </Box>
         </Index>
