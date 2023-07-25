@@ -25,13 +25,17 @@ const Authorized: FunctionComponent = () => {
         secrets: [],
         lastUpdate: 0,
     });
+    const [loading, setLoading] = useState<LoadingState>({
+        decrypting: false,
+        updating: false,
+    });
     const toast = useToast();
     const toastIdRef = useRef<ToastId>();
     const { userState } = useUserContext();
     const { tonConnect } = useTonConnectContext();
 
     const decryptContent = async (encryptedContent: EncryptedContentDto) => {
-        userState.fetchingData = true;
+        setLoading({ ...loading, decrypting: true });
         try {
             const content = await userState.secretKeeper?.decryptContent(encryptedContent);
             if (content) {
@@ -60,13 +64,12 @@ const Authorized: FunctionComponent = () => {
                     duration: 3000,
                 });
             }
-        } finally {
-            userState.fetchingData = false;
         }
+        setLoading({ ...loading, decrypting: false });
     };
 
     const updateWholeContent = async () => {
-        userState.fetchingData = true;
+        setLoading({ ...loading, updating: true });
         try {
             const now = Date.now();
             const createContentDto = await userState.secretKeeper?.generateCreateContentDto({
@@ -74,7 +77,7 @@ const Authorized: FunctionComponent = () => {
                 secrets: decryptedContent.secrets,
             });
             if (!createContentDto) {
-                userState.fetchingData = false;
+                setLoading({ ...loading, updating: false });
                 return;
             }
             await userState.sendAndObtainLastEncryptedContent(createContentDto);
@@ -101,9 +104,8 @@ const Authorized: FunctionComponent = () => {
                 status: 'error',
                 duration: 3000,
             });
-        } finally {
-            userState.fetchingData = false;
         }
+        setLoading({ ...loading, updating: false });
     };
 
     const setDecryptedSecrets = (secrets: SecretInterface[]) => {
