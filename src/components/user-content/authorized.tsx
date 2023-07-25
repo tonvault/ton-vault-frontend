@@ -128,10 +128,6 @@ const Authorized: FunctionComponent = () => {
         );
     }
 
-    if (loading.decrypting || loading.updating) {
-        return <LoadingScreen />;
-    }
-
     return (
         <Box m={4}>
             {contentDecrypted ? (

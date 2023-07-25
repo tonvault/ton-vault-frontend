@@ -98,10 +98,6 @@ const TonConnectModal: FunctionComponent<TonConnectModalProps> = ({ isOpen, onCl
         );
     };
 
-    if (userState.fetchingData) {
-        return <LoadingScreen />;
-    }
-
     return (
         <>
             <Modal isCentered onClose={onClose} isOpen={isOpen} motionPreset="slideInBottom">

@@ -31,10 +31,6 @@ const UserContent = () => {
         }
     }, [userState.isAuthorized, userState.encryptedContent]);
 
-    if (userState.fetchingData) {
-        return <NotAuthorized />;
-    }
-
     return userState.isAuthorized ? <Authorized /> : <NotAuthorized />;
 };
 
