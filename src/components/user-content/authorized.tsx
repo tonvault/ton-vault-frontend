@@ -9,7 +9,6 @@ import EncryptedScene from '@/components/user-content/encrypted-scene';
 import DecryptedScene from '@/components/user-content/decrypted-scene';
 import { EncryptedContentDto } from '@/services/ton-vault-api/dto';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
-import LoadingScreen from '@/components/loading-screen';
 import { ErrorWithCode } from '@/utils/error-with-code';
 import { AnswerCode } from '@/services/ton-vault-api/answer-code';
 import useTonConnectContext from '@/providers/ton-connect-provider/use-ton-connect-context';
@@ -26,17 +25,13 @@ const Authorized: FunctionComponent = () => {
         secrets: [],
         lastUpdate: 0,
     });
-    const [loading, setLoading] = useState<LoadingState>({
-        decrypting: false,
-        updating: false,
-    });
     const toast = useToast();
     const toastIdRef = useRef<ToastId>();
     const { userState } = useUserContext();
     const { tonConnect } = useTonConnectContext();
 
     const decryptContent = async (encryptedContent: EncryptedContentDto) => {
-        setLoading({ ...loading, decrypting: true });
+        userState.fetchingData = true;
         try {
             const content = await userState.secretKeeper?.decryptContent(encryptedContent);
             if (content) {
@@ -65,12 +60,13 @@ const Authorized: FunctionComponent = () => {
                     duration: 3000,
                 });
             }
+        } finally {
+            userState.fetchingData = false;
         }
-        setLoading({ ...loading, decrypting: false });
     };
 
     const updateWholeContent = async () => {
-        setLoading({ ...loading, updating: true });
+        userState.fetchingData = true;
         try {
             const now = Date.now();
             const createContentDto = await userState.secretKeeper?.generateCreateContentDto({
@@ -78,7 +74,7 @@ const Authorized: FunctionComponent = () => {
                 secrets: decryptedContent.secrets,
             });
             if (!createContentDto) {
-                setLoading({ ...loading, updating: false });
+                userState.fetchingData = false;
                 return;
             }
             await userState.sendAndObtainLastEncryptedContent(createContentDto);
@@ -105,8 +101,9 @@ const Authorized: FunctionComponent = () => {
                 status: 'error',
                 duration: 3000,
             });
+        } finally {
+            userState.fetchingData = false;
         }
-        setLoading({ ...loading, updating: false });
     };
 
     const setDecryptedSecrets = (secrets: SecretInterface[]) => {

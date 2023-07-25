@@ -17,7 +17,6 @@ import { CompatibleWalletNames } from '@/constant/compatible-wallets';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
 import { observer } from 'mobx-react-lite';
 import { TonVaultApi } from '@/services/ton-vault-api/ton-vault-api';
-import LoadingScreen from '@/components/loading-screen';
 
 type TonConnectModalProps = {
     isOpen: boolean;
@@ -92,6 +91,7 @@ const TonConnectModal: FunctionComponent<TonConnectModalProps> = ({ isOpen, onCl
                 mx={1}
                 key={wallet.name}
                 onClick={() => onWalletClick(wallet)}
+                isLoading={userState.fetchingData}
             >
                 {wallet.name}
             </Button>

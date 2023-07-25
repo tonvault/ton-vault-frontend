@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useUserContext } from '@/providers/user-state-provider/use-user-context';
 import NotAuthorized from '@/components/user-content/not-authorized';
@@ -9,6 +9,7 @@ const UserContent = () => {
     const { userState } = useUserContext();
     const toast = useToast();
     const toastIdRef = useRef<ToastId>();
+    const [contentFetched, setContentFetched] = useState(false);
     useEffect(() => {
         const obtainData = async () => {
             try {
@@ -27,11 +28,11 @@ const UserContent = () => {
             }
         };
         if (userState.isAuthorized) {
-            obtainData();
+            obtainData().then(() => setContentFetched(true));
         }
     }, [userState.isAuthorized, userState.encryptedContent]);
 
-    return userState.isAuthorized ? <Authorized /> : <NotAuthorized />;
+    return userState.isAuthorized && contentFetched ? <Authorized /> : <NotAuthorized />;
 };
 
 export default observer(UserContent);
