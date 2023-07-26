@@ -18,6 +18,9 @@ yarn dev
 pnpm dev
 ```
 
+## Alpha build:
+https://ton-vault.k8s-prod.hashex.dev/
+
 ## Ton Vault Protocol
 
 Check details about Ton Vault Protocol in  [official documentation](https://tonvault.gitbook.io/docs/).
