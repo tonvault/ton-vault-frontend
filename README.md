@@ -8,7 +8,7 @@ Powered by [Next.js](https://nextjs.org/)
 
 To run the development server:
 
-Create .env file using .env.example, then
+Create .env file using .env.example, install dependencies and run dev script:
 
 ```bash
 npm run dev
